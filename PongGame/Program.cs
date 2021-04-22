@@ -20,8 +20,8 @@ namespace PongGame
         [STAThread]
         static void Main()
         {
-            using (var game = new PongGame())
-                game.Run();
+            using var game = new PongGame();
+            game.Run();
         }
     }
 }

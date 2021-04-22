@@ -10,6 +10,7 @@
     Revision History  :
     Date        Author      Ref     Revision 
     23/04/2021  Rilegis     1       First code commit.
+    23/04/2021  Rilegis     2       Renamed 'Score' SpriteFont to 'Font'.
 **********************************************************************/
 
 using Microsoft.Xna.Framework;
@@ -73,7 +74,7 @@ namespace PongGame
             ballSpeedX = 500f; // Set ball's 'X' speed
             ballSpeedY = 500f; // Set ball's 'Y' speed
             playerSpeed = 350f; // Set players bars speed
-            
+
             // Initialize the game
             base.Initialize();
         }
@@ -86,7 +87,7 @@ namespace PongGame
             ballTexture = Content.Load<Texture2D>("ball_32x32");
             barTexture = Content.Load<Texture2D>("bar_20x150");
 
-            font = Content.Load<SpriteFont>("Score");
+            font = Content.Load<SpriteFont>("Font");
         }
 
         protected override void Update(GameTime gameTime)
@@ -182,7 +183,7 @@ namespace PongGame
 
             // Draw scoreboard
             _spriteBatch.DrawString(font, $"Player 1: {player1Score}\nPlayer 2: {player2Score}", new Vector2(20f, 20f), Color.White);
-            _spriteBatch.DrawString(font, $"Frame time: {gameTime.ElapsedGameTime.TotalMilliseconds}ms\nFPS: {Math.Round(1/gameTime.ElapsedGameTime.TotalSeconds, 2)}", new Vector2(20f, _graphics.PreferredBackBufferHeight - 80f), Color.White);
+            _spriteBatch.DrawString(font, $"Frame time: {gameTime.ElapsedGameTime.TotalMilliseconds}ms\nFPS: {Math.Round(1 / gameTime.ElapsedGameTime.TotalSeconds, 2)}", new Vector2(20f, _graphics.PreferredBackBufferHeight - 80f), Color.White);
 
             _spriteBatch.End();
 

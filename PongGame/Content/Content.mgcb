@@ -42,5 +42,5 @@
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Score.spritefont
+/build:Score.spritefont;Font.spritefont
 

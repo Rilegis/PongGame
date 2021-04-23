@@ -12,6 +12,7 @@
     23/04/2021  Rilegis     1       First code commit.
     23/04/2021  Rilegis     2       Renamed 'Score' SpriteFont to 'Font'.
     23/04/2021  Rilegis     3       Fixed ball bouncing direction.
+    23/04/2021  Rilegis     4       Implemented game state class.
 **********************************************************************/
 
 using Microsoft.Xna.Framework;
@@ -26,29 +27,11 @@ namespace PongGame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        // Initialize game state
+        private GameState _gameState = new GameState();
+
         // Fonts
-        SpriteFont font;
-
-        // Textures
-        Texture2D ballTexture;
-        Texture2D barTexture;
-
-        // Positions
-        Vector2 ballPosition;
-        Vector2 player1Position;
-        Vector2 player2Position;
-
-        // Speeds
-        float ballSpeedX;
-        float ballSpeedY;
-        float playerSpeed;
-
-        // Player scores
-        int player1Score = 0;
-        int player2Score = 0;
-
-        // tmp
-        GameTime updateTime;
+        private SpriteFont _font;
 
 
         public PongGame()
@@ -67,14 +50,9 @@ namespace PongGame
             base.Window.Title = "Pong";
 
             // Positions
-            ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2); // Position the ball at the center of the screen
-            player1Position = new Vector2(30f, _graphics.PreferredBackBufferHeight / 2); // Position player 1 on the left of the screen
-            player2Position = new Vector2(_graphics.PreferredBackBufferWidth - 50f, _graphics.PreferredBackBufferHeight / 2); // Position player 1 on the right of the screen
-
-            // Speeds
-            ballSpeedX = 500f; // Set ball's 'X' speed
-            ballSpeedY = 500f; // Set ball's 'Y' speed
-            playerSpeed = 350f; // Set players bars speed
+            _gameState.Ball.Position = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2); // Position the ball at the center of the screen
+            _gameState.Player1.Position = new Vector2(0f, _graphics.PreferredBackBufferHeight / 2); // Position player 1 on the left of the screen
+            _gameState.Player2.Position = new Vector2(_graphics.PreferredBackBufferWidth - 20, _graphics.PreferredBackBufferHeight / 2); // Position player 1 on the right of the screen
 
             // Initialize the game
             base.Initialize();
@@ -85,70 +63,70 @@ namespace PongGame
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // NOTE: use this.Content to load your game content here
-            ballTexture = Content.Load<Texture2D>("ball_32x32");
-            barTexture = Content.Load<Texture2D>("bar_20x150");
+            _gameState.Ball.Texture = Content.Load<Texture2D>("ball_32x32");
+            _gameState.Player1.Texture = Content.Load<Texture2D>("bar_20x150");
+            _gameState.Player2.Texture = _gameState.Player1.Texture;
 
-            font = Content.Load<SpriteFont>("Font");
+            _font = Content.Load<SpriteFont>("Font");
         }
 
         protected override void Update(GameTime gameTime)
         {
             KeyboardState kState = Keyboard.GetState(); // Get keyboard state
 
-            ballPosition.X += ballSpeedX * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            ballPosition.Y += ballSpeedY * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _gameState.Ball.Position.X += _gameState.Ball.Speed.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _gameState.Ball.Position.Y += _gameState.Ball.Speed.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // Player 1 controls
             if (kState.IsKeyDown(Keys.W))
-                player1Position.Y -= playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _gameState.Player1.Position.Y -= _gameState.Player1.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (kState.IsKeyDown(Keys.S))
-                player1Position.Y += playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _gameState.Player1.Position.Y += _gameState.Player1.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Player 2 controls
             if (kState.IsKeyDown(Keys.Up))
-                player2Position.Y -= playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _gameState.Player2.Position.Y -= _gameState.Player2.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (kState.IsKeyDown(Keys.Down))
-                player2Position.Y += playerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _gameState.Player2.Position.Y += _gameState.Player2.Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 
             // Check if ball is hitting the screen's bounding box
-            if ((ballPosition.X > _graphics.PreferredBackBufferWidth - (ballTexture.Width / 2)) || (ballPosition.X < (ballTexture.Width / 2)))
+            if ((_gameState.Ball.Position.X > _graphics.PreferredBackBufferWidth - (_gameState.Ball.Texture.Width / 2)) || (_gameState.Ball.Position.X < (_gameState.Ball.Texture.Width / 2)))
             {
                 // TODO: Show winner
                 //ballSpeedX = -ballSpeedX;
-                ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
-                ballPosition.Y = _graphics.PreferredBackBufferHeight / 2;
-                player1Score = 0;
-                player2Score = 0;
+                _gameState.Ball.Position.X = _graphics.PreferredBackBufferWidth / 2;
+                _gameState.Ball.Position.Y = _graphics.PreferredBackBufferHeight / 2;
+                _gameState.Player1.Score = 0;
+                _gameState.Player2.Score = 0;
             }
-            if (ballPosition.Y > _graphics.PreferredBackBufferHeight - (ballTexture.Height / 2) || (ballPosition.Y < (ballTexture.Height / 2)))
-                ballSpeedY = -ballSpeedY;
+            if (_gameState.Ball.Position.Y > _graphics.PreferredBackBufferHeight - (_gameState.Ball.Texture.Height / 2) || (_gameState.Ball.Position.Y < (_gameState.Ball.Texture.Height / 2)))
+                _gameState.Ball.Speed.Y = -_gameState.Ball.Speed.Y;
 
             // Check if ball hit player 1 bar
-            if (((ballPosition.X - ballTexture.Width / 2) <= (player1Position.X + barTexture.Width)) && (ballPosition.Y >= player1Position.Y) && (ballPosition.Y <= (player1Position.Y + barTexture.Height)))
+            if (((_gameState.Ball.Position.X - _gameState.Ball.Texture.Width / 2) <= (_gameState.Player1.Position.X + _gameState.Player1.Texture.Width)) && (_gameState.Ball.Position.Y >= _gameState.Player1.Position.Y) && (_gameState.Ball.Position.Y <= (_gameState.Player1.Position.Y + _gameState.Player1.Texture.Height)))
             {
-                ballSpeedX = -ballSpeedX;
-                player1Score++;
+                _gameState.Ball.Speed.X = -_gameState.Ball.Speed.X;
+                _gameState.Player1.Score++;
             }
             // Check if ball hit player 2 bar
-            else if (((ballPosition.X + ballTexture.Width / 2) >= player2Position.X) && (ballPosition.Y >= player2Position.Y) && (ballPosition.Y <= (player2Position.Y + barTexture.Height)))
+            else if (((_gameState.Ball.Position.X + _gameState.Ball.Texture.Width / 2) >= _gameState.Player2.Position.X) && (_gameState.Ball.Position.Y >= _gameState.Player2.Position.Y) && (_gameState.Ball.Position.Y <= (_gameState.Player2.Position.Y + _gameState.Player2.Texture.Height)))
             {
-                ballSpeedX = -ballSpeedX;
-                player2Score++;
+                _gameState.Ball.Speed.X = -_gameState.Ball.Speed.X;
+                _gameState.Player2.Score++;
             }
 
             // Check if player 1 bar is hitting the screen's bounding box
-            if (player1Position.Y >= _graphics.PreferredBackBufferHeight - barTexture.Height)
-                player1Position.Y = _graphics.PreferredBackBufferHeight - barTexture.Height;
-            else if (player1Position.Y <= 0)
-                player1Position.Y = 0;
+            if (_gameState.Player1.Position.Y >= _graphics.PreferredBackBufferHeight - _gameState.Player1.Texture.Height)
+                _gameState.Player1.Position.Y = _graphics.PreferredBackBufferHeight - _gameState.Player1.Texture.Height;
+            else if (_gameState.Player1.Position.Y <= 0)
+                _gameState.Player1.Position.Y = 0;
             // Check if player 2 bar is hitting the screen's bounding box
-            if (player2Position.Y >= _graphics.PreferredBackBufferHeight - barTexture.Height)
-                player2Position.Y = _graphics.PreferredBackBufferHeight - barTexture.Height;
-            else if (player2Position.Y <= 0)
-                player2Position.Y = 0;
+            if (_gameState.Player2.Position.Y >= _graphics.PreferredBackBufferHeight - _gameState.Player2.Texture.Height)
+                _gameState.Player2.Position.Y = _graphics.PreferredBackBufferHeight - _gameState.Player2.Texture.Height;
+            else if (_gameState.Player2.Position.Y <= 0)
+                _gameState.Player2.Position.Y = 0;
 
             // NOTE: Add your update logic here
-            updateTime = gameTime;
             base.Update(gameTime);
         }
 
@@ -159,30 +137,30 @@ namespace PongGame
             // NOTE: Add your drawing code here
             _spriteBatch.Begin();
             _spriteBatch.Draw( // Draw the ball
-                ballTexture,
-                ballPosition,
+                _gameState.Ball.Texture,
+                _gameState.Ball.Position,
                 null,
                 Color.White,
                 0f,
-                new Vector2(ballTexture.Width / 2, ballTexture.Height / 2),
+                new Vector2(_gameState.Ball.Texture.Width / 2, _gameState.Ball.Texture.Height / 2),
                 Vector2.One,
                 SpriteEffects.None,
                 0f
             );
-            _spriteBatch.Draw(barTexture, player1Position, Color.White); // Draw player 1
-            _spriteBatch.Draw(barTexture, player2Position, Color.White); // Draw player 2
+            _spriteBatch.Draw(_gameState.Player1.Texture, _gameState.Player1.Position, Color.White); // Draw Player1
+            _spriteBatch.Draw(_gameState.Player2.Texture, _gameState.Player2.Position, Color.White); // Draw Player2
 
             // Draw court divider
             int tmp = 0;
             for (int i = 0; i < 8; i++)
             {
-                _spriteBatch.Draw(barTexture, new Rectangle(_graphics.PreferredBackBufferWidth / 2 - 5, 9 + tmp, 10, 50), Color.White);
+                _spriteBatch.Draw(_gameState.Player1.Texture, new Rectangle(_graphics.PreferredBackBufferWidth / 2 - 5, 9 + tmp, 10, 50), Color.White);
                 tmp += 100;
             }
 
             // Draw scoreboard
-            _spriteBatch.DrawString(font, $"Player 1: {player1Score}\nPlayer 2: {player2Score}", new Vector2(20f, 20f), Color.White);
-            _spriteBatch.DrawString(font, $"Frame time: {gameTime.ElapsedGameTime.TotalMilliseconds}ms\nFPS: {Math.Round(1 / gameTime.ElapsedGameTime.TotalSeconds, 2)}", new Vector2(20f, _graphics.PreferredBackBufferHeight - 80f), Color.White);
+            _spriteBatch.DrawString(_font, $"Player 1: {_gameState.Player1.Score}\nPlayer 2: {_gameState.Player2.Score}", new Vector2(20f, 20f), Color.White);
+            _spriteBatch.DrawString(_font, $"Frame time: {gameTime.ElapsedGameTime.TotalMilliseconds}ms\nFPS: {Math.Round(1 / gameTime.ElapsedGameTime.TotalSeconds, 2)}", new Vector2(20f, _graphics.PreferredBackBufferHeight - 80f), Color.White);
 
             _spriteBatch.End();
 

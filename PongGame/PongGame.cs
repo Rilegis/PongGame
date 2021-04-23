@@ -11,6 +11,7 @@
     Date        Author      Ref     Revision 
     23/04/2021  Rilegis     1       First code commit.
     23/04/2021  Rilegis     2       Renamed 'Score' SpriteFont to 'Font'.
+    23/04/2021  Rilegis     3       Fixed ball bouncing direction.
 **********************************************************************/
 
 using Microsoft.Xna.Framework;
@@ -126,14 +127,12 @@ namespace PongGame
             if (((ballPosition.X - ballTexture.Width / 2) <= (player1Position.X + barTexture.Width)) && (ballPosition.Y >= player1Position.Y) && (ballPosition.Y <= (player1Position.Y + barTexture.Height)))
             {
                 ballSpeedX = -ballSpeedX;
-                ballSpeedY = -ballSpeedY;
                 player1Score++;
             }
             // Check if ball hit player 2 bar
             else if (((ballPosition.X + ballTexture.Width / 2) >= player2Position.X) && (ballPosition.Y >= player2Position.Y) && (ballPosition.Y <= (player2Position.Y + barTexture.Height)))
             {
                 ballSpeedX = -ballSpeedX;
-                ballSpeedY = -ballSpeedY;
                 player2Score++;
             }
 

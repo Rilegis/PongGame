@@ -19,6 +19,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Diagnostics;
 
 namespace PongGame
 {
@@ -29,6 +30,10 @@ namespace PongGame
 
         // Initialize game state
         private GameState _gameState = new GameState();
+
+        // Textures
+        private Texture2D _ballTexture;
+        private Texture2D _rectangleTexture;
 
         // Fonts
         private SpriteFont _font;
@@ -44,8 +49,8 @@ namespace PongGame
         protected override void Initialize()
         {
             // NOTE: Add your initialization logic here
-            _graphics.PreferredBackBufferWidth = 1536;
-            _graphics.PreferredBackBufferHeight = 768;
+            _graphics.PreferredBackBufferWidth = (int)_gameState.CourtSize.X;
+            _graphics.PreferredBackBufferHeight = (int)_gameState.CourtSize.Y;
             _graphics.ApplyChanges();
             base.Window.Title = "Pong";
 
@@ -63,11 +68,13 @@ namespace PongGame
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // NOTE: use this.Content to load your game content here
-            _gameState.Ball.Texture = Content.Load<Texture2D>("ball_32x32");
-            _gameState.Player1.Texture = Content.Load<Texture2D>("bar_20x150");
-            _gameState.Player2.Texture = _gameState.Player1.Texture;
-
+            _ballTexture = Content.Load<Texture2D>("ball_32x32");
+            _rectangleTexture = Content.Load<Texture2D>("bar_20x150");
             _font = Content.Load<SpriteFont>("Font");
+
+            _gameState.Ball.Texture = _ballTexture;
+            _gameState.Player1.Texture = _rectangleTexture;
+            _gameState.Player2.Texture = _rectangleTexture;
         }
 
         protected override void Update(GameTime gameTime)
@@ -90,30 +97,30 @@ namespace PongGame
 
 
             // Check if ball is hitting the screen's bounding box
-            if ((_gameState.Ball.Position.X > _graphics.PreferredBackBufferWidth - (_gameState.Ball.Texture.Width / 2)) || (_gameState.Ball.Position.X < (_gameState.Ball.Texture.Width / 2)))
+            if (_gameState.Ball.Position.X >= _graphics.PreferredBackBufferWidth - (_gameState.Ball.Texture.Width / 2))
             {
-                // TODO: Show winner
-                //ballSpeedX = -ballSpeedX;
                 _gameState.Ball.Position.X = _graphics.PreferredBackBufferWidth / 2;
                 _gameState.Ball.Position.Y = _graphics.PreferredBackBufferHeight / 2;
-                _gameState.Player1.Score = 0;
-                _gameState.Player2.Score = 0;
+
+                _gameState.Player1.Score++;
             }
+            else if (_gameState.Ball.Position.X < (_gameState.Ball.Texture.Width / 2))
+            {
+                _gameState.Ball.Position.X = _graphics.PreferredBackBufferWidth / 2;
+                _gameState.Ball.Position.Y = _graphics.PreferredBackBufferHeight / 2;
+
+                _gameState.Player2.Score++;
+            }
+
             if (_gameState.Ball.Position.Y > _graphics.PreferredBackBufferHeight - (_gameState.Ball.Texture.Height / 2) || (_gameState.Ball.Position.Y < (_gameState.Ball.Texture.Height / 2)))
                 _gameState.Ball.Speed.Y = -_gameState.Ball.Speed.Y;
 
             // Check if ball hit player 1 bar
             if (((_gameState.Ball.Position.X - _gameState.Ball.Texture.Width / 2) <= (_gameState.Player1.Position.X + _gameState.Player1.Texture.Width)) && (_gameState.Ball.Position.Y >= _gameState.Player1.Position.Y) && (_gameState.Ball.Position.Y <= (_gameState.Player1.Position.Y + _gameState.Player1.Texture.Height)))
-            {
                 _gameState.Ball.Speed.X = -_gameState.Ball.Speed.X;
-                _gameState.Player1.Score++;
-            }
             // Check if ball hit player 2 bar
             else if (((_gameState.Ball.Position.X + _gameState.Ball.Texture.Width / 2) >= _gameState.Player2.Position.X) && (_gameState.Ball.Position.Y >= _gameState.Player2.Position.Y) && (_gameState.Ball.Position.Y <= (_gameState.Player2.Position.Y + _gameState.Player2.Texture.Height)))
-            {
                 _gameState.Ball.Speed.X = -_gameState.Ball.Speed.X;
-                _gameState.Player2.Score++;
-            }
 
             // Check if player 1 bar is hitting the screen's bounding box
             if (_gameState.Player1.Position.Y >= _graphics.PreferredBackBufferHeight - _gameState.Player1.Texture.Height)
@@ -132,6 +139,7 @@ namespace PongGame
 
         protected override void Draw(GameTime gameTime)
         {
+            Debug.WriteLine("TEST");
             GraphicsDevice.Clear(Color.Black);
 
             // NOTE: Add your drawing code here
@@ -159,8 +167,13 @@ namespace PongGame
             }
 
             // Draw scoreboard
-            _spriteBatch.DrawString(_font, $"Player 1: {_gameState.Player1.Score}\nPlayer 2: {_gameState.Player2.Score}", new Vector2(20f, 20f), Color.White);
-            _spriteBatch.DrawString(_font, $"Frame time: {gameTime.ElapsedGameTime.TotalMilliseconds}ms\nFPS: {Math.Round(1 / gameTime.ElapsedGameTime.TotalSeconds, 2)}", new Vector2(20f, _graphics.PreferredBackBufferHeight - 80f), Color.White);
+            _spriteBatch.DrawString(_font, $"Player 1: {_gameState.Player1.Score}", new Vector2(16f, 16f), Color.White);
+            _spriteBatch.DrawString(_font, $"Player 2: {_gameState.Player2.Score}", new Vector2((_graphics.PreferredBackBufferWidth / 2) + 21, 16f), Color.White);
+
+
+#if DEBUG
+            _spriteBatch.DrawString(_font, $"Ball speed: X={_gameState.Ball.Speed.X}, Y={_gameState.Ball.Speed.Y}\nFrame time: {gameTime.ElapsedGameTime.TotalMilliseconds}ms\nFPS: {Math.Round(1 / gameTime.ElapsedGameTime.TotalSeconds, 2)}", new Vector2(20f, _graphics.PreferredBackBufferHeight - 76f), Color.White);
+#endif
 
             _spriteBatch.End();
 

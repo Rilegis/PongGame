@@ -21,20 +21,22 @@ namespace PongGame
         public Ball Ball = new Ball();
         public Player Player1 = new Player();
         public Player Player2 = new Player();
+
+        public Vector2 CourtSize = new Vector2(1536, 768);
     }
 
     public class Ball
     {
         public Texture2D Texture;
         public Vector2 Position;
-        public Vector2 Speed = new Vector2(500f, 500f); // Initialize to default value
+        public Vector2 Speed = new Vector2(300f, 300f); // Initialize to default value
     }
 
     public class Player
     {
         public Texture2D Texture;
         public Vector2 Position;
-        public float Speed { get; set; } = 350f; // Initialize to default value
+        public float Speed { get; set; } = 500f; // Initialize to default value
         public int Score { get; set; } = 0; // Initialize to default value
     }
 }

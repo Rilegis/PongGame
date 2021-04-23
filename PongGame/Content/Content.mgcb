@@ -37,10 +37,10 @@
 /processorParam:TextureFormat=Color
 /build:bar_20x150.png
 
-#begin Score.spritefont
+#begin Font.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
-/build:Score.spritefont;Font.spritefont
+/build:Font.spritefont
 

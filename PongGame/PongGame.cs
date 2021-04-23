@@ -139,7 +139,6 @@ namespace PongGame
 
         protected override void Draw(GameTime gameTime)
         {
-            Debug.WriteLine("TEST");
             GraphicsDevice.Clear(Color.Black);
 
             // NOTE: Add your drawing code here

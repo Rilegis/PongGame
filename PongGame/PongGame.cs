@@ -154,11 +154,13 @@ namespace PongGame
                 {
                     _gameState.IsPaused = true;
                     _gameState.Player1.Score = 0;
+                    _gameState.Player2.Score = 0;
                     _gameState.Player1.IsWinner = true;
                 }
                 else if (_gameState.Player2.Score.Equals(10))
                 {
                     _gameState.IsPaused = true;
+                    _gameState.Player1.Score = 0;
                     _gameState.Player2.Score = 0;
                     _gameState.Player2.IsWinner = true;
                 }
